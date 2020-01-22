@@ -1,0 +1,42 @@
+---
+
+- name: Kibana - Création de groupe kibana
+  group:
+    name: "{{ kibana_group }}"
+    state: present
+
+- name: Kibana - Création de l'utilisateur Kibana
+  user:
+    name: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+
+- name: Kibana - Vérifier le répertoire /applis
+  file:
+    path: /applis/sources
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Kibana - Création de l'arborésence principale
+  file:
+    path: "/applis/{{ item }}"
+    state: directory
+    name: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0775
+  with_items:
+    - kibana
+    - kibana/logs
+    - kibana/tmp
+    - kibana/run
+  tags: create_kibana_folders
+
+- name: Kibana - Copier les sources de la version d'kibana
+  copy:
+    src: /applis/ansible/big-files/kibana-{{ kibana_version }}-linux-x86_64.tar.gz
+    dest: /applis/sources
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0664
+  tags: copy_kibana_sources

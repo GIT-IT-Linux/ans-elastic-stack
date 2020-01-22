@@ -1,0 +1,42 @@
+---
+
+- name: Logstash - Création de groupe logstash
+  group:
+    name: "{{ logstash_group }}"
+    state: present
+
+- name: Logstash - Création de l'utilisateur logstash
+  user:
+    name: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+
+- name: Logstash - Vérifier le répertoire /applis
+  file:
+    path: /applis/sources
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Logstash - Création de l'arborésence principale
+  file:
+    path: "/applis/{{ item }}"
+    state: directory
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0775
+  with_items:
+    - logstash
+    - logstash/logs
+    - logstash/tmp
+    - logstash/run
+  tags: logstash
+
+- name: Kibana - Copier les sources de la version de logstash
+  copy:
+    src: /applis/ansible/big-files/logstash-{{ logstash_version }}.tar.gz
+    dest: /applis/sources
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0664
+  tags: copy_logstash_sources

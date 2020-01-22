@@ -1,0 +1,15 @@
+[Unit]
+Description=Cerebro
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ cerebro_user }}
+Group={{ cerebro_group }}
+
+ExecStart={{ cerebro_path_global}}/cerebro/bin/cerebro -Dhttp.port={{ cerebro_port }} -Dhttp.address={{ cerebro_host }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

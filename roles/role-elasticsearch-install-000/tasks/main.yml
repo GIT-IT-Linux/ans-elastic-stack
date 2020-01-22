@@ -1,0 +1,16 @@
+---
+# Tâche pour inclure les tâches principale de l'installation du Cluster
+
+- name: Inclure la tâche de configuration commune aux VM
+  import_tasks: elasticsearch_commun.yml
+  ignore_errors: true
+
+- name: Inclure la tâche d'installation du Cluster
+  import_tasks: elasticsearch_install.yml
+  ignore_errors: true
+
+- name: Inclure la tâche d'installation du NFS et du répo
+  import_tasks: elasticsearch_snapshots.yml
+  ignore_errors: true
+
+# Fin

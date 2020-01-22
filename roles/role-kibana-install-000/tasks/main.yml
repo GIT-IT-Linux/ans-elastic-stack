@@ -1,0 +1,12 @@
+---
+# Tâche pour inclure les tâches principale de l'installation du Cluster
+
+- name: Inclure la tâche de configuration commune aux VM
+  import_tasks: kibana_commun.yml
+  ignore_errors: true
+
+- name: Include la tâche d'installation du Kibana
+  import_tasks: kibana_install.yml
+  ignore_errors: true
+
+# Fin

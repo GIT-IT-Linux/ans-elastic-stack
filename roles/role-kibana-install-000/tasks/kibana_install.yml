@@ -1,0 +1,61 @@
+---
+
+- name: Kibana - Création de l'arboréscence
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0775
+  with_items:
+    - "/applis/kibana/run/{{ kibana_node }}"
+    - "/applis/kibana/{{ kibana_node }}"
+    - "/applis/kibana/logs/{{ kibana_node }}"
+
+- name: Kibana - Décompresser les sources
+  unarchive:
+    src: "/applis/sources/kibana-{{ kibana_version }}-linux-x86_64.tar.gz"
+    dest: "{{ kibana_path_global }}/{{ kibana_node }}"
+    remote_src: yes
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+
+- name: Kibana - Créer le lien symbolique
+  file:
+    src: "{{ kibana_path_global }}/{{ kibana_node }}/kibana-{{ kibana_version }}-linux-x86_64"
+    dest: "{{ kibana_path_global }}/{{ kibana_node }}/kibana"
+    state: link
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+
+- name: Kibana - Copier le fichier de configuration kibana.yml
+  template:
+    src: kibana.yml.j2
+    dest: "/applis/kibana/{{ kibana_node }}/kibana/config/kibana.yml"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0664
+
+- name: Kibana - Copier le fichier de service
+  template:
+    src: kibana.service.j2
+    dest: "/etc/systemd/system/kibana-{{ kibana_node }}.service"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0664
+
+- name: Kibana - Systemd
+  systemd:
+    name: kibana-{{ kibana_node }}.service
+    state: stopped
+    enabled: yes
+    daemon-reload: yes
+
+- name: Kibana - Firewall
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - "{{ kibana_port }}"

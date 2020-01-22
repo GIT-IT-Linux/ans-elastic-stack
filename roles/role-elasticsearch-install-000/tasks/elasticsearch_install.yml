@@ -1,0 +1,84 @@
+---
+
+- name: Elasticsearch - Création de l'arboréscence
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0775
+  with_items:
+    - "/applis/elasticsearch/data/{{ elasticsearch_node }}"
+    - "/applis/elasticsearch/logs/{{ elasticsearch_node }}"
+    - "/applis/elasticsearch/tmp/{{ elasticsearch_node }}"
+    - "/applis/elasticsearch/run/{{ elasticsearch_node }}"
+    - "/applis/elasticsearch/nodes/{{ elasticsearch_node }}"
+
+- name: Elasticsearch - Décompresser les sources
+  unarchive:
+    src: "/applis/sources/elasticsearch-{{ elasticsearch_version }}.tar.gz"
+    dest: "{{ elasticsearch_path_global }}/{{ elasticsearch_node }}"
+    remote_src: yes
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+
+- name: Elasticsearch - Créer le lien symbolique
+  file:
+    src: "{{ elasticsearch_path_global }}/{{ elasticsearch_node }}/elasticsearch-{{ elasticsearch_version }}"
+    dest: "{{ elasticsearch_path_global }}/{{ elasticsearch_node }}/elasticsearch"
+    state: link
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+
+- name: Elasticsearch - Copier le fichier de configuration elasticsearch.yml
+  template:
+    src: elasticsearch.yml.j2
+    dest: "/applis/elasticsearch/nodes/{{ elasticsearch_node }}/elasticsearch/config/elasticsearch.yml"
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0664
+
+- name: Elasticsearch - Copier le fichier de configuration jvm.options
+  template:
+    src: jvm.options.j2
+    dest: "/applis/elasticsearch/nodes/{{ elasticsearch_node }}/elasticsearch/config/jvm.options"
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0664
+
+- name: Elasticsearch - Copier le fichier de service
+  template:
+    src: elasticsearch.service.j2
+    dest: "/etc/systemd/system/elasticsearch-{{ elasticsearch_node }}.service"
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0664
+
+- name: Elasticsearch - Systemd
+  systemd:
+    name: elasticsearch-{{ elasticsearch_node }}.service
+    state: stopped
+    enabled: yes
+    daemon-reload: yes
+
+- name: Elasticsearch - Firewall
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - "{{ elasticsearch_http_port }}"
+    - "{{ elasticsearch_transport_port }}"
+
+- name: Reboot
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+
+- name: Attendre le reboot de la VM
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300

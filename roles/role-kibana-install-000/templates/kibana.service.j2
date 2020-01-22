@@ -1,0 +1,13 @@
+[Unit]
+Description=Kibana
+
+[Service]
+Type=simple
+User={{ kibana_user }}
+Group={{ kibana_group }}
+ExecStart={{ kibana_path_global }}/{{ kibana_node }}/kibana/bin/kibana
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

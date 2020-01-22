@@ -1,0 +1,18 @@
+---
+
+logstash_version: "7.2.0"
+logstash_user: logstash
+logstash_group: logstash
+
+logstash_node: "instance-01"
+logstash_path_global: "/applis/logstash"
+logstash_path_config: "/applis/logstash/{{ logstash_node }}/conf.d"
+logstash_path_run: "/applis/logstash/run/{{ logstash_node }}"
+logstash_path_tmp: "/applis/logstash/tmp/{{ logstash_node }}"
+logstash_path_logs: "/applis/logstash/logs/{{ logstash_node }}"
+
+logstash_jvm_max: 1g
+logstash_jvm_min: 1g
+logstash_http_port: 9600
+logstash_http_host: "0.0.0.0"
+logstash_jmx_port: 9700

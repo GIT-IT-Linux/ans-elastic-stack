@@ -1,0 +1,68 @@
+---
+
+- name: Elasticsearch - Création de groupe elasticsearch
+  group:
+    name: "{{ elasticsearch_group }}"
+    state: present
+
+- name: Elasticsearch - Création de l'utilisateur elasticsearch
+  user:
+    name: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+
+- name: Elasticsearch - Modifier le limits.conf
+  pam_limits:
+    domain: "{{ elasticsearch_user }}"
+    limit_type: '-'
+    limit_item: nofile
+    value: 65535
+
+- name: Elasticsearch - Modifier le maximum de threads
+  pam_limits:
+    domain: "{{ elasticsearch_user }}"
+    limit_type: '-'
+    limit_item: nproc
+    value: 4096
+
+- name: Elasticsearch - Modifier les parametres système
+  shell: "{{ item }}"
+  with_items:
+    - "echo 'vm.max_map_count=262144' >> /etc/sysctl.conf"
+    
+- name: Elasticsearch - Vérifier le répertoire /applis
+  file:
+    path: /applis/sources
+    state: directory
+    recurse: yes
+    owner: root
+    group: "{{ elasticsearch_group }}"
+
+- name: Elasticsearch - Création de l'arborésence principale
+  file:
+    path: "/applis/{{ item }}"
+    state: directory
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0775
+  with_items:
+    - elasticsearch
+    - elasticsearch/logs
+    - elasticsearch/nodes
+    - elasticsearch/tmp
+    - elasticsearch/data
+    - elasticsearch/run
+  tags: create_elasticsearch_folders
+
+- name: Elasticsearch - Copier les sources de la version d'elasticseach
+  copy:
+    src: /applis/ansible/big-files/elasticsearch-{{ elasticsearch_version }}.tar.gz
+    dest: /applis/sources
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0664
+  tags: copy_elasticsearch_sources
+
+- name: Elasticsearch - Installer OpenJDK 1.8.0 x64
+  yum:
+    name: java-1.8.0-openjdk.x86_64
+    state: present

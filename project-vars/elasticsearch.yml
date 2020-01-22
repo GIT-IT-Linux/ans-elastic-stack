@@ -1,0 +1,18 @@
+elasticsearch_version: "7.2.0"
+elasticsearch_user: elasticsearch
+elasticsearch_group: elasticsearch
+elasticsearch_cluster_name: cluster-production-01
+elasticsearch_path_global: "/applis/elasticsearch/nodes"
+elasticsearch_path_data: "/applis/elasticsearch/data/{{ elasticsearch_node }}"
+elasticsearch_path_logs: "/applis/elasticsearch/logs/{{ elasticsearch_node }}"
+elasticsearch_path_tmp: "/applis/elasticsearch/tmp/{{ elasticsearch_node }}"
+elasticsearch_path_run: "/applis/elasticsearch/run/{{ elasticsearch_node }}"
+elasticsearch_path_plugins: "/applis/elasticsearch/nodes/{{ elasticsearch_node }}/elasticsearch/plugins"
+elasticsearch_path_conf: "/applis/elasticsearch/nodes/{{ elasticsearch_node }}/elasticsearch/config"
+elasticsearch_http_port: 9220
+elasticsearch_transport_port: 9330
+
+# Elasticsearch Snapshots
+
+elasticsearch_snap_path: "/applis/elasticsearch/snapshots"
+elasticsearch_nfs_export: "192.168.10.100:/volume2/NFS/POOL_ELK_SAVE"

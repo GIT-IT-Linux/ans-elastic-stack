@@ -1,0 +1,14 @@
+---
+
+kibana_version: "7.2.0"
+kibana_user: kibana
+kibana_group: kibana
+kibana_elasticsearch_port: "9220"
+kibana_elasticsearch_host: "127.0.0.1"
+kibana_server: "0.0.0.0"
+kibana_port: "5601"
+kibana_node: "instance-01"
+kibana_path_global: "/applis/kibana"
+kibana_path_run: "/applis/kibana/run/{{ kibana_node }}"
+kibana_path_logs: "/applis/kibana/logs"
+

@@ -1,0 +1,8 @@
+---
+
+- hosts: elastic-stack
+
+- import_playbook: 1000-playbook-elasticsearch-install.yml
+- import_playbook: 1000-playbook-elasticsearch-cerebro-install.yml
+- import_playbook: 1000-playbook-kibana-install.yml
+- import_playbook: 1000-playbook-logstash-install.yml

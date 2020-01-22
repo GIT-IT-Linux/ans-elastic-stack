@@ -1,0 +1,18 @@
+---
+- hosts: elasticsearch
+  remote_user: root
+
+  pre_tasks:
+  - name: Inclure les variables du projet
+    include_vars:
+      file: "/applis/ansible/ans-elastic-stack/project-vars/kibana.yml"
+
+  - name: Inclure les variables de la VM
+    include_vars:
+      file: "/applis/ansible/ans-elastic-stack/host_vars/{{ inventory_hostname }}.yml"
+
+  tasks:
+  - name: Inclure les roles
+    include_role:
+      name: role-kibana-install-000
+      allow_duplicates: false

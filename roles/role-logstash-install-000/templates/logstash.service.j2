@@ -1,0 +1,35 @@
+[Unit]
+Description=logstash-{{ logstash_node }}
+
+[Service]
+Type=simple
+
+Environment=LS_HOME={{ logstash_path_global }}/{{ logstash_node }}/logstash
+Environment=LS_CONF_DIR={{ logstash_path_global }}/{{ logstash_node }}/conf.d
+Environment=LS_CONFIG_DIR={{ logstash_path_global }}/{{ logstash_node }}/logstash/config
+Environment=LS_LOG_DIR={{ logstash_path_logs }}/{{ logstash_node }}
+Environment="JAVA_OPTS=-XX:+UseParNewGC -Dcom.sun.management.jmxremote.port={{ logstash_jmx_port }} -Dcom.sun.management.jmxremote.rmi.port={{ logstash_jmx_port }} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -XX:+UseConcMarkSweepGC -Djava.awt.headless=true -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+HeapDumpOnOutOfMemoryError"
+
+User={{ logstash_user }}
+Group={{ logstash_group }}
+
+# Load env vars from /etc/default/ and /etc/sysconfig/ if they exist.
+# Prefixing the path with '-' makes it try to load, but if the file doesn't
+# exist, it continues onward.
+
+#EnvironmentFile=-/etc/default/test_logstash
+#EnvironmentFile=-/etc/sysconfig/test_logstash
+
+ExecStart={{ logstash_path_global }}/{{ logstash_node }}/logstash/bin/logstash \
+            -l ${LS_LOG_DIR} 
+
+Restart=always
+
+WorkingDirectory=/
+
+Nice=19
+
+LimitNOFILE=16384
+
+[Install]
+WantedBy=multi-user.target

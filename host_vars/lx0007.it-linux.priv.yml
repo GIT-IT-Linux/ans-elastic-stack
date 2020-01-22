@@ -1,0 +1,8 @@
+# Variables ELK
+elasticsearch_node: worker-01
+elasticsearch_master: "true"
+elasticsearch_data: "true"
+elasticsearch_ingest: "true"
+
+elasticsearch_jvm_min: 2g
+elasticsearch_jvm_max: 2g

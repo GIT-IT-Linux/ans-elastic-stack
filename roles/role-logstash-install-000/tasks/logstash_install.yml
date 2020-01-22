@@ -1,0 +1,80 @@
+---
+
+- name: Logstash - Création de l'arboréscence
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0775
+  with_items:
+    - "{{ logstash_path_global }}/{{ logstash_node }}"
+    - "{{ logstash_path_run }}"
+    - "{{ logstash_path_tmp }}"
+    - "{{ logstash_path_config }}"
+
+- name: Logstash - Décompresser les sources
+  unarchive:
+    src: "/applis/sources/logstash-{{ logstash_version }}.tar.gz"
+    dest: "{{ logstash_path_global }}/{{ logstash_node }}"
+    remote_src: yes
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+
+- name: Logstash - Créer le lien symbolique
+  file:
+    src: "{{ logstash_path_global }}/{{ logstash_node }}/logstash-{{ logstash_version }}"
+    dest: "{{ logstash_path_global }}/{{ logstash_node }}/logstash"
+    state: link
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+
+- name: Logstash - Copier le fichier de configuration logstash.yml
+  template:
+    src: logstash.yml.j2
+    dest: "/applis/logstash/{{ logstash_node }}/logstash/config/logstash.yml"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0664
+
+- name: Logstash - Copier le fichier de configuration jvm.options
+  template:
+    src: jvm.options.j2
+    dest: "/applis/logstash/{{ logstash_node }}/logstash/config/jvm.options"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0664
+
+- name: Logstash - Copier le fichier de configuration pipeline.yml
+  template:
+    src: pipelines.yml.j2
+    dest: "/applis/logstash/{{ logstash_node }}/logstash/config/pipeline.yml"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0664
+
+- name: Logstash - Copier le fichier de service
+  template:
+    src: logstash.service.j2
+    dest: "/etc/systemd/system/logstash-{{ logstash_node }}.service"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0664
+
+- name: Logstash - Systemd
+  systemd:
+    name: logstash-{{ logstash_node }}.service
+    state: stopped
+    enabled: yes
+    daemon-reload: yes
+
+- name: Logstash Firewall
+  firewalld:
+    port: "{{ item }}/tcp"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  with_items:
+    - "{{ logstash_http_port }}"
+    - "{{ logstash_jmx_port }}"
+

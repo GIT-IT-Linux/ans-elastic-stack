@@ -1,0 +1,24 @@
+---
+
+- name: Elasticsearch - Créer le répertoire d'accueil des snapshots
+  file:
+    path: "{{ elasticsearch_snap_path }}"
+    state: directory
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0775
+
+- name: Elastcisearch - Monter le NFS
+  mount:
+    path: "{{ elasticsearch_snap_path }}"
+    src: "{{ elasticsearch_nfs_export }}"
+    fstype: nfs
+    state: mounted
+
+- name: Elasticsearch - Changer les droits sur le répertoire NFS
+  file:
+    path: "{{ elasticsearch_snap_path }}"
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    mode: 0775
+

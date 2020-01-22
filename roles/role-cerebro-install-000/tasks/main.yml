@@ -1,0 +1,86 @@
+---
+
+- name: Cerebro - Création du groupe Cerebro
+  group:
+    name: "{{ cerebro_group }}"
+
+- name: Cerebro - Création de l'utilisateur Cerebro
+  user:
+    name: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+
+- name: Cerebro - Création de l'arboréscence
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+    mode: 0775
+  with_items:
+    - "{{ cerebro_path_global }}"
+    - "{{ cerebro_path_logs }}"
+    - "{{ cerebro_path_run }}"
+    - "{{ cerebro_path_tmp }}"
+
+- name: Cerebro - Copier les sources
+  copy:
+    src: "/applis/ansible/big-files/cerebro-{{ cerebro_version }}.tgz"
+    dest: "/applis/sources"
+
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+    mode: 0664
+
+- name: Cerebro - Décompresser les sources
+  unarchive:
+    src: "/applis/sources/cerebro-{{ cerebro_version }}.tgz"
+    dest: "/applis/cerebro"
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+    remote_src: yes
+
+- name: Cerebro - Créer le lien symbolique
+  file:
+    src: "{{ cerebro_path_global }}/cerebro-{{ cerebro_version }}"
+    dest: "{{ cerebro_path_global }}/cerebro"
+    state: link
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+
+- name: Cerebro - Copier le fichier de configuration
+  template:
+    src: application.conf.j2
+    dest: "{{ cerebro_path_global }}/cerebro/conf/application.conf"
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+    mode: 0664
+
+- name: Cerebro - Copier le fichier de configuration
+  template:
+    src: logback.xml.j2
+    dest: "{{ cerebro_path_global }}/cerebro/conf/logback.xml"
+    owner: "{{ cerebro_user }}"
+    group: "{{ cerebro_group }}"
+    mode: 0664
+
+- name: Cerebro - Création du fichier de service
+  template:
+    src: cerebro.service.j2
+    dest: /etc/systemd/system/cerebro.service
+    owner: root
+    group: root
+    mode: 0664
+
+- name: Cerebro - Systemd
+  systemd:
+    name: cerebro.service
+    state: stopped
+    enabled: yes
+    daemon-reload: yes
+
+- name: Cerebro - Firewall
+  firewalld:
+    port: "{{ cerebro_port }}/tcp"
+    state: enabled
+    immediate: yes
+    permanent: yes

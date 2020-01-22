@@ -1,0 +1,14 @@
+---
+
+cerebro_version: 0.8.2
+cerebro_host: 0.0.0.0
+elasticsearch_host: localhost
+elasticsearch_port: 9220
+elasticsearch_cluster_name: "Cluster Production"
+cerebro_port: 9000
+cerebro_path_global: /applis/cerebro
+cerebro_path_run: /applis/cerebro/run
+cerebro_path_logs: /applis/cerebro/logs
+cerebro_path_tmp: /applis/cerebro/tmp
+cerebro_user: cerebro
+cerebro_group: cerebro
